@@ -1,5 +1,5 @@
 "----------------------- Begun Vundle Setup ------------------------------------
-" Vundle allows us to manage plugins with ease 
+" Vundle allows us to manage plugins with ease
 set nocompatible              " Required
 filetype off                  " Required
 
@@ -15,6 +15,8 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'kien/ctrlp.vim'
 " PHP syntax Plugin
 Plugin 'scrooloose/syntastic'
+" NERDTree Plugin
+Plugin 'scrooloose/nerdtree'
 " Auto-completion Plugin
 Plugin 'Raimondi/delimitMate'
 
@@ -51,10 +53,13 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_php_checkers = ["php"]
 
 "----------------------- Vdebug Plugin ---------------------------------------
-let g:vdebug_options['path_maps'] = {"/code/drupal/employee/employee": "/Users/brandtj/git/dcsdSoftware/drupal/employee/employee", "/code/phpcommon": "/Users/brandtj/git/dcsdSoftware/phpcommon"}
-let g:vdebug_options['server'] = ""
-let g:vdebug_options['break_on_open'] = 0
-let g:vdebug_options["continuous_mode"] = 0
+if !exists("g:vdebug_options")
+  "let g:vdebug_options['path_maps'] = {"/code/drupal/employee/employee": "/Users/brandtj/git/dcsdSoftware/drupal/employee/employee", "/code/moodle/webapp": "/Users/brandtj/git/dcsdSoftware/moodle/webapp", "/code/phpcommon": "/Users/brandtj/git/dcsdSoftware/phpcommon"}
+  let g:vdebug_options['path_maps'] = {"/code/drupal/employee/employee": "/Users/brandtj/git/dcsdSoftware/drupal/employee/employee", "/code/phpcommon": "/Users/brandtj/git/dcsdSoftware/phpcommon"}
+  let g:vdebug_options['server'] = ""
+  "let g:vdebug_options['break_on_open'] = 0
+  "let g:vdebug_options["continuous_mode"] = 0
+endif
 
 "----------------------- CtrlP Plugin ------------------------------------------
 "searching by filename (as opposed to full path)
@@ -63,6 +68,12 @@ let g:ctrlp_regexp = 1
 let g:ctrlp_mruf_max = 1000
 " Make ctrlp only look for source controlled files
 let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files --exclude-standard -co']
+
+"----------------------- NERDTree Plugin ---------------------------------------
+" Close NERDTree if it is the only window left
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+let NERDTreeChDirMode=2
+"autocmd BufEnter * if &modifiable | NERDTreeFind | wincmd p | endif
 
 "----------------------- VIM settings ------------------------------------------
 
@@ -88,7 +99,7 @@ set mousehide           " Hide the mouse when typing
 set hlsearch            " Highlight search patterns
 set hidden              " Hide buffers instead of closing them
 set wildignore=*.swp,*.bak,*.pyc,*.class
-set wildmenu            " Turn on the wildmenu
+set wildmenu            " Turn on the wildmenu (for tab completion)
 set wildmode=full       " Complete the next full match
 set number              " Always show line numbers
 set colorcolumn+=81     " Highlight column after 'textwidth'
@@ -99,7 +110,7 @@ set cursorline          " Highlight the cursor line
 set statusline=         " Clear out
 set statusline+=%m%r%w  " Show modified/read-only/preview-window
 set statusline+=%t\     " Show file name
-"set statusline+=\|\ %{strftime('%Y/%b/%d\ %a\ %I:%M\ %p')}\ 
+"set statusline+=\|\ %{strftime('%Y/%b/%d\ %a\ %I:%M\ %p')}\
 set statusline+=\|\%{GetMethodName()}\ \|\ \%{GetPhpFramework()}\ " Show method name
 set statusline+=%=%{GetBranchName()}\ \@\ \%{GetRepoName()}\ \|\ %l,%v\ \|\ %p%%\ " Show Line number,Column | Percent in file
 set statusline+=%{SyntasticStatuslineFlag()}
@@ -136,6 +147,19 @@ set title               " Change the terminal's title
 "set switchbuf+=newtab   " Quickfix in new tab
 
 set completeopt=menu,preview
+" Remove any trailing whitespace or empty lines with whitespace on save
+"autocmd BufWritePre <buffer> :call StripTrailingWhitespace()
+" strips trailing whitespace from file.
+function! StripTrailingWhitespace()
+  " save last search and cursor position
+  let _s=@/
+  let l = line(".")
+  let c = col(".")
+  " e suppresses any errors
+  %s/\s\+$//e
+  let @/=_s
+  call cursor(l, c)
+endfunction
 
 "---------------------- Syntax & Filetypes -------------------------------------
 if has("autocmd")
@@ -148,7 +172,7 @@ endif
 
 " Don't show tabs for .snippets
 autocmd FileType snippets setlocal listchars-=tab:>.
-  
+
 " Comments used for filetypes
 au FileType c,cpp,java,php,drupal setlocal comments-=:// comments+=f://
 
@@ -173,7 +197,7 @@ autocmd BufRead,BufNewFile *.theme   set filetype=drupal
 autocmd BufRead,BufNewFile *.install set filetype=drupal
 
 "----------------------- Ctags -------------------------------------------------
-set tags=~/.vim/tags/moodle,~/.vim/tags/drupal
+"set tags=~/.vim/tags/moodle,~/.vim/tags/drupal
 
 "----------------------- Colors / Font -----------------------------------------
 "set term=xterm-256color
@@ -344,8 +368,6 @@ nnoremap ; :
 " Commenting code.
 noremap   <buffer> K      :call CommentCode()<CR>
 noremap   <buffer> <C-K>  :call UncommentCode()<CR>
-"noremap   <buffer> K      :s,^\(\s*\)[^<c-r>c \t]\@=,\1<c-r>c,e<CR>:nohls<CR>zv
-"noremap   <buffer> <C-K>  :s,^\(\s*\)<c-r>c\s\@!,\1,e<CR>:nohls<CR>zv
 
 " Ctags navigation
 nnoremap <C-\> :tabnew %<CR>g<C-]>
