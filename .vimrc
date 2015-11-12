@@ -111,7 +111,7 @@ set statusline=         " Clear out
 set statusline+=%m%r%w  " Show modified/read-only/preview-window
 set statusline+=%t\     " Show file name
 "set statusline+=\|\ %{strftime('%Y/%b/%d\ %a\ %I:%M\ %p')}\
-set statusline+=\|\%{GetMethodName()}\ \|\ \%{GetPhpFramework()}\ " Show method name
+set statusline+=\|\%{GetMethodName()}\ \|\ " Show method name
 set statusline+=%=%{GetBranchName()}\ \@\ \%{GetRepoName()}\ \|\ %l,%v\ \|\ %p%%\ " Show Line number,Column | Percent in file
 set statusline+=%{SyntasticStatuslineFlag()}
 
@@ -179,9 +179,6 @@ au FileType c,cpp,java,php,drupal setlocal comments-=:// comments+=f://
 " Automatically set the current directory to this files location
 autocmd BufEnter * silent! lcd %:p:h
 
-" Setup project based on our current path
-autocmd BufEnter * call SetupProject()
-
 " Map enter onto itself in quickfix window so we can open the file under
 " cursor
 :autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
@@ -195,9 +192,6 @@ autocmd BufRead,BufNewFile *.module  set filetype=drupal
 autocmd BufRead,BufNewFile *.profile set filetype=drupal
 autocmd BufRead,BufNewFile *.theme   set filetype=drupal
 autocmd BufRead,BufNewFile *.install set filetype=drupal
-
-"----------------------- Ctags -------------------------------------------------
-"set tags=~/.vim/tags/moodle,~/.vim/tags/drupal
 
 "----------------------- Colors / Font -----------------------------------------
 "set term=xterm-256color
@@ -290,21 +284,6 @@ function! GetRepoName()
 endfunction
 
 "-------------------------------------------------------------------------------
-function! GetPhpFramework()
-  let path = expand("%:p")
-  let framework = ""
-  if(path =~ "moodle")
-    let framework = "moodle"
-  elseif(path =~ "drupal")
-    let framework = "drupal"
-  elseif(path =~ "phpcommon")
-    let framework = "phpcommon"
-  endif
-
-  return framework
-endfunction
-
-"-------------------------------------------------------------------------------
 function! CreatePhpTags()
   let path = expand("%:p")
   if(path =~ "moodle")
@@ -330,18 +309,6 @@ function! GoToTag(tagWord)
   if l:tagFilename == ''
       :tabclose
       :tabprevious
-  endif
-endfunction
-
-"-------------------------------------------------------------------------------
-function! SetupProject()
-  let path = expand("%:p")
-  if(path =~ "moodle")
-    setlocal tags=~/.vim/tags/moodle
-    setlocal shiftwidth=4
-  elseif(path =~ "drupal")
-    setlocal tags=~/.vim/tags/drupal
-    setlocal shiftwidth=2
   endif
 endfunction
 
@@ -404,9 +371,6 @@ nmap <silent> <leader>ev :tabnew ~/.vimrc<CR>
 nmap <silent> <leader>sv :so ~/.vimrc<CR> :nohls<CR>
 nmap <silent> <leader>ea :tabnew ~/.bashrc<CR>
 
-" Edit user overrides for vagrant
-nmap <silent> <leader>eo :tabnew ~/git/dcsdSoftware/utils/vagrant/user_overrides.json<CR>
-
 " Edit todo list
 nmap <silent> <leader>et :tabnew ~/temp/todo.txt<CR>
 
@@ -433,11 +397,6 @@ nnoremap <leader>se :,$s/\<<c-r><c-w>\>/
 " Replace word under cursor with current copy register
 nnoremap S "_diwP
 
-" Find files in repositories
-nnoremap <leader>f :CtrlP ~/git/dcsdSoftware/drupal/employee/employee<CR>
-nnoremap <leader>c :CtrlP ~/git/dcsdSoftware/phpcommon<CR>
-nnoremap <leader>d :CtrlP ~/git/dcsdSoftware<CR>
-
 " Word search in project directory
 nnoremap <silent> <leader>w :call SearchProject("<c-r><c-w>")<CR>
 nnoremap <leader>ws :call SearchProject("")<left><left>
@@ -453,3 +412,25 @@ au Filetype java,cpp,php inoremap { {<CR>}<Esc>ko
 au Filetype java,cpp,drupal inoremap /c <c-r>=expand("%:t:r")<CR>
 " Insert the method name
 au Filetype java,cpp,php inoremap /f <c-r>=GetMethodName()<CR>
+
+"----------------------- Project Settings --------------------------------------
+autocmd BufEnter * call SetupDcsdProject()
+
+function! SetupDcsdProject()
+  let path = expand("%:p")
+  if(path =~ "moodle")
+    setlocal tags=~/.vim/tags/moodle
+    setlocal shiftwidth=4
+  elseif(path =~ "drupal")
+    setlocal tags=~/.vim/tags/drupal
+    setlocal shiftwidth=2
+  endif
+endfunction
+
+" Edit user overrides for vagrant
+nmap <silent> <leader>eo :tabnew ~/git/dcsdSoftware/utils/vagrant/user_overrides.json<CR>
+
+" Find files in repositories
+nnoremap <leader>f :CtrlP ~/git/dcsdSoftware/drupal/employee/employee<CR>
+nnoremap <leader>c :CtrlP ~/git/dcsdSoftware/phpcommon<CR>
+nnoremap <leader>d :CtrlP ~/git/dcsdSoftware<CR>
