@@ -28,6 +28,9 @@ Plugin 'garbas/vim-snipmate'
 " PHP Xdebug Plugin
 Plugin 'joonty/vdebug'
 
+" Fugtive (Git Wrapper)
+Plugin 'tpope/vim-fugitive'
+
 " The following are examples of different formats supported.
 " plugin from http://vim-scripts.org/vim/scripts.html
 " Plugin 'L9'
@@ -45,21 +48,14 @@ Plugin 'joonty/vdebug'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
+source variables.vim
+
 "----------------------- Syntasic Plugin ---------------------------------------
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_php_checkers = ["php"]
-
-"----------------------- Vdebug Plugin ---------------------------------------
-if !exists("g:vdebug_options")
-  "let g:vdebug_options['path_maps'] = {"/code/drupal/employee/employee": "/Users/brandtj/git/dcsdSoftware/drupal/employee/employee", "/code/moodle/webapp": "/Users/brandtj/git/dcsdSoftware/moodle/webapp", "/code/phpcommon": "/Users/brandtj/git/dcsdSoftware/phpcommon"}
-  let g:vdebug_options['path_maps'] = {"/code/drupal/employee/employee": "/Users/brandtj/git/dcsdSoftware/drupal/employee/employee", "/code/phpcommon": "/Users/brandtj/git/dcsdSoftware/phpcommon"}
-  let g:vdebug_options['server'] = ""
-  "let g:vdebug_options['break_on_open'] = 0
-  "let g:vdebug_options["continuous_mode"] = 0
-endif
 
 "----------------------- CtrlP Plugin ------------------------------------------
 "searching by filename (as opposed to full path)
@@ -220,19 +216,6 @@ function! GetMethodName()
 endfunction
 
 "-------------------------------------------------------------------------------
-function! SearchProject(word)
-  let path = expand("%:p")
-  if(path =~ "moodle")
-    let projectFolder = "~/git/dcsdSoftware/moodle/webapp/"
-  elseif(path =~ "drupal")
-    let projectFolder = "~/git/dcsdSoftware/drupal/employee/employee/"
-  endif
-  echo "Searching for " . a:word . " in " . projectFolder . "..."
-  execute ":silent grep -r " . a:word . " " . projectFolder
-  execute ":silent cw"
-endfunction
-
-"-------------------------------------------------------------------------------
 function! CommentCode()
   let c = '// '
   if(&filetype =~ 'vim\|_gvimrc')
@@ -281,22 +264,6 @@ function! GetRepoName()
   endif
 
   return reponame
-endfunction
-
-"-------------------------------------------------------------------------------
-function! CreatePhpTags()
-  let path = expand("%:p")
-  if(path =~ "moodle")
-    echo "Creating tags for moodle project..."
-    exec ":silent !phptags.sh moodle ~/git/dcsdSoftware/moodle/webapp"
-    echo "Done creating tags for moodle"
-  elseif(path =~ "drupal")
-    echo "Creating tags for drupal project..."
-    exec ":silent !phptags.sh drupal ~/git/dcsdSoftware/drupal/employee"
-    echo "Done creating tags for drupal"
-  else
-    echo "Unrecognized php project"
-  endif
 endfunction
 
 "-------------------------------------------------------------------------------
@@ -355,7 +322,6 @@ map <C-S> :w<CR>
 map <C-F12> :!ctags -f ~/.vim/tags/cpp -R --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ .<CR>
 map <C-F11> :call CreatePhpTags()<CR>
 
-
 " git mappings
 " Bring up visual log display of file
 nmap <silent><leader>vt :!gitk <c-r>% &<CR><CR>
@@ -397,10 +363,6 @@ nnoremap <leader>se :,$s/\<<c-r><c-w>\>/
 " Replace word under cursor with current copy register
 nnoremap S "_diwP
 
-" Word search in project directory
-nnoremap <silent> <leader>w :call SearchProject("<c-r><c-w>")<CR>
-nnoremap <leader>ws :call SearchProject("")<left><left>
-
 "----------------------- Mappings (Insert Mode) --------------------------------
 " jj will exit insert mode
 inoremap jj <Esc>
@@ -414,23 +376,4 @@ au Filetype java,cpp,drupal inoremap /c <c-r>=expand("%:t:r")<CR>
 au Filetype java,cpp,php inoremap /f <c-r>=GetMethodName()<CR>
 
 "----------------------- Project Settings --------------------------------------
-autocmd BufEnter * call SetupDcsdProject()
-
-function! SetupDcsdProject()
-  let path = expand("%:p")
-  if(path =~ "moodle")
-    setlocal tags=~/.vim/tags/moodle
-    setlocal shiftwidth=4
-  elseif(path =~ "drupal")
-    setlocal tags=~/.vim/tags/drupal
-    setlocal shiftwidth=2
-  endif
-endfunction
-
-" Edit user overrides for vagrant
-nmap <silent> <leader>eo :tabnew ~/git/dcsdSoftware/utils/vagrant/user_overrides.json<CR>
-
-" Find files in repositories
-nnoremap <leader>f :CtrlP ~/git/dcsdSoftware/drupal/employee/employee<CR>
-nnoremap <leader>c :CtrlP ~/git/dcsdSoftware/phpcommon<CR>
-nnoremap <leader>d :CtrlP ~/git/dcsdSoftware<CR>
+source project.vim
